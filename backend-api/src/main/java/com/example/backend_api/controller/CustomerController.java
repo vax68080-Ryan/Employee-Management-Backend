@@ -174,6 +174,12 @@ public class CustomerController {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
             if (params != null) {
+                if (StringUtils.hasText(params.get("ids"))) {
+                    // 前端傳來的可能是 "C001,C002,C003" 這樣的字串
+                    String[] ids = params.get("ids").split(",");
+                    // 使用 SQL 的 IN 語法: WHERE id IN ('C001', 'C002'...)
+                    predicates.add(root.get("id").in((Object[]) ids));
+                }
                 if (StringUtils.hasText(params.get("id")))
                     predicates.add(cb.like(root.get("id"), "%" + params.get("id") + "%"));
                 if (StringUtils.hasText(params.get("name")))
