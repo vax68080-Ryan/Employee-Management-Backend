@@ -54,16 +54,27 @@ public class EmployeeController {
     }
 
     // 💡 新增員工：統一進行密碼加密與預設等級設定
+    // EmployeeController.java
+
+    // 💡 新增員工：加入 ID 重複檢查
     @PostMapping
     public ResponseEntity<?> create(@RequestBody Employee p) {
+        // 1. 檢查 ID 是否已存在
+        if (repo.existsById(p.getId())) {
+            // 若存在，回傳 409 Conflict 錯誤，並帶上錯誤訊息
+            return ResponseEntity.status(409).body("錯誤：員工 ID \"" + p.getId() + "\" 已存在，請使用其他 ID。");
+        }
+
+        // 2. 密碼加密邏輯 (保持原本邏輯)
         if (p.getPassword() == null || p.getPassword().isEmpty()) {
-            p.setPassword(passwordEncoder.encode("1234")); // 預設密碼
+            p.setPassword(passwordEncoder.encode("1234"));
         } else {
             p.setPassword(passwordEncoder.encode(p.getPassword()));
         }
 
+        // 3. 設定預設等級 (保持原本邏輯)
         if (p.getLevel() == null) {
-            p.setLevel(2); // 預設一般員工
+            p.setLevel(2);
         }
 
         return ResponseEntity.ok(repo.save(p));
